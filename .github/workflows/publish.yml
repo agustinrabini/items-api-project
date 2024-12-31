@@ -1,0 +1,103 @@
+name: Publish API
+ 
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, develop]
+    paths-ignore:
+      - '**/README.md'
+      - '**/*.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v3
+ 
+      - name: Generate vendor folder
+        run: go mod vendor
+
+      - name: Get master environment
+        if: github.ref_name == 'master'
+        run: |
+          COMMIT_HASH=$(git log --pretty=format:%h -n 1)
+          DEPLOY_ENVIRONMENT=prod-$COMMIT_HASH
+          echo "Deploy environment: $DEPLOY_ENVIRONMENT"
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT" >> $GITHUB_ENV
+
+      - name: Get staging environment
+        if: github.ref_name == 'develop'
+        run: |
+          COMMIT_HASH=$(git log --pretty=format:%h -n 1)
+          DEPLOY_ENVIRONMENT=stage-$COMMIT_HASH
+          echo "Deploy environment: $DEPLOY_ENVIRONMENT"
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT" >> $GITHUB_ENV
+ 
+      - name: Build and Tag Docker Image
+        run: docker build -t agustinrabini/items-api-project:${{ env.DEPLOY_ENVIRONMENT }} -f environment/items-api-project.dockerfile .
+
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
+
+      - name: Push image to DockerHub
+        run: docker image push agustinrabini/items-api-project:${{ env.DEPLOY_ENVIRONMENT }}
+
+  rollback:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v3
+
+      - name: Rollback docker-compose to server
+        uses: agustinrabini/github-action-ssh-docker-compose@1.0.3
+        with:
+          docker_compose_prefix: api_items
+          docker_compose_filename: environment/docker-compose.yml
+          docker_compose_down: 'true'
+          ssh_user: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_USERNAME || secrets.STAGING_SERVER_SSH_USERNAME }}
+          ssh_host: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_HOST || secrets.STAGING_SERVER_SSH_HOST }}
+          ssh_port: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_PORT || secrets.STAGING_SERVER_SSH_PORT }}
+          ssh_private_key: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_PRIVATE_KEY || secrets.STAGING_SERVER_SSH_PRIVATE_KEY }}
+
+  release:
+    needs: rollback
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v3
+
+      - name: Get master environment
+        if: github.ref_name == 'master'
+        run: |
+          COMMIT_HASH=$(git log --pretty=format:%h -n 1)
+          DEPLOY_ENVIRONMENT=prod-$COMMIT_HASH
+          echo "Deploy environment: $DEPLOY_ENVIRONMENT"
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT" >> $GITHUB_ENV
+
+      - name: Get staging environment
+        if: github.ref_name == 'develop'
+        run: |
+          COMMIT_HASH=$(git log --pretty=format:%h -n 1)
+          DEPLOY_ENVIRONMENT=stage-$COMMIT_HASH
+          echo "Deploy environment: $DEPLOY_ENVIRONMENT"
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT" >> $GITHUB_ENV
+
+      - name: Deploy docker-compose to server
+        uses: agustinrabini/github-action-ssh-docker-compose@1.0.3
+        with:
+          deploy_environment: ${{ env.DEPLOY_ENVIRONMENT }}
+          docker_compose_prefix: api_items
+          docker_compose_filename: environment/docker-compose.yml
+          ssh_user: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_USERNAME || secrets.STAGING_SERVER_SSH_USERNAME }}
+          ssh_host: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_HOST || secrets.STAGING_SERVER_SSH_HOST }}
+          ssh_port: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_PORT || secrets.STAGING_SERVER_SSH_PORT }}
+          ssh_private_key: ${{ github.ref_name == 'master' && secrets.SERVER_SSH_PRIVATE_KEY || secrets.STAGING_SERVER_SSH_PRIVATE_KEY }}
+          firebase_credentials: ${{ github.ref_name == 'master' && secrets.SERVER_FIREBASE_CREDENTIALS || secrets.DEVELOP_FIREBASE_CREDENTIALS }}
+          mongo_username: ${{ github.ref_name == 'master' && secrets.MONGO_USERNAME || secrets.STAGING_MONGO_USERNAME }}
+          mongo_password: ${{ github.ref_name == 'master' && secrets.MONGO_PASSWORD || secrets.STAGING_MONGO_PASSWORD }}
+          mongo_host: ${{ github.ref_name == 'master' && secrets.MONGO_HOST || secrets.STAGING_MONGO_HOST }}
+          mongo_database: ${{ github.ref_name == 'master' && secrets.MONGO_DATABASE || secrets.STAGING_MONGO_DATABASE }}
+          admin_password: ${{ secrets.ADMIN_PASSWORD }}
+          admin_username: ${{ secrets.ADMIN_USERNAME }}

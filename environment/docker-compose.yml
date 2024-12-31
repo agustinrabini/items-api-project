@@ -1,0 +1,25 @@
+version: '2.1'
+
+services:
+    items-api-project:
+      container_name: items-api-project
+      image: agustinrabini/items-api-project:${DEPLOY_ENVIRONMENT}
+      restart: always
+      volumes:
+        - /log/api_items:/var/log
+      environment:
+        MONGO_USERNAME: ${MONGO_USERNAME}
+        MONGO_PASSWORD: ${MONGO_PASSWORD}
+        MONGO_HOST: ${MONGO_HOST}
+        MONGO_DATABASE: ${MONGO_DATABASE}
+        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+        ADMIN_USERNAME: ${ADMIN_USERNAME}
+        FIREBASE_CREDENTIALS: ${FIREBASE_CREDENTIALS}
+      ports:
+        - "8009:8080"
+      networks:
+        - "internalnet"
+
+networks:
+  internalnet:
+    external: true

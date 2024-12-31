@@ -1,0 +1,455 @@
+definitions:
+  domain.Attributes:
+    additionalProperties:
+      type: string
+    type: object
+  domain.Category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.Currency:
+    properties:
+      decimal_divider:
+        type: string
+      id:
+        type: string
+      symbol:
+        type: string
+      thousands_divider:
+        type: string
+    type: object
+  domain.Eligible:
+    properties:
+      id:
+        type: string
+      is_required:
+        type: boolean
+      options:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  domain.Item:
+    properties:
+      attributes:
+        $ref: '#/definitions/domain.Attributes'
+      category:
+        $ref: '#/definitions/domain.Category'
+      description:
+        type: string
+      eligible:
+        items:
+          $ref: '#/definitions/domain.Eligible'
+        type: array
+      id:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/domain.Price'
+      shop_id:
+        type: string
+      status:
+        default: active
+        type: string
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  domain.ItemsIds:
+    properties:
+      items:
+        items:
+          type: string
+        type: array
+    type: object
+  domain.ItemsOutput:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/domain.Item'
+        type: array
+    type: object
+  domain.Price:
+    properties:
+      amount:
+        type: number
+      currency:
+        $ref: '#/definitions/domain.Currency'
+      id:
+        type: string
+      item_id:
+        type: string
+    type: object
+  dto.AttributesDTO:
+    additionalProperties:
+      type: string
+    type: object
+  dto.CategoryDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.CurrencyDTO:
+    properties:
+      decimal_divider:
+        type: string
+      id:
+        type: string
+      symbol:
+        type: string
+      thousands_divider:
+        type: string
+    type: object
+  dto.EligibleDTO:
+    properties:
+      id:
+        type: string
+      is_required:
+        type: boolean
+      options:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.ItemDTO:
+    properties:
+      attributes:
+        $ref: '#/definitions/dto.AttributesDTO'
+      category:
+        $ref: '#/definitions/dto.CategoryDTO'
+      description:
+        type: string
+      eligible:
+        items:
+          $ref: '#/definitions/dto.EligibleDTO'
+        type: array
+      images:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/dto.PriceDTO'
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.PriceDTO:
+    properties:
+      amount:
+        type: number
+      currency:
+        $ref: '#/definitions/dto.CurrencyDTO'
+      id:
+        type: string
+    type: object
+info:
+  contact:
+    email: agustinrabini99@gmail.com
+    name: Agustin Rabini
+    url: http://www.swagger.io/support
+  description: This is a api items.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: API Items
+  version: "1.0"
+paths:
+  /items:
+    get:
+      consumes:
+      - application/json
+      description: Get Items by User ID in Header Authorization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ItemsOutput'
+      summary: Get Items by User ID
+      tags:
+      - Items
+    post:
+      consumes:
+      - application/json
+      description: Create item in db
+      parameters:
+      - description: Add item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ItemDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create Item
+      tags:
+      - Items
+  /items/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item by ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete item
+      tags:
+      - Items
+    get:
+      consumes:
+      - application/json
+      description: Get details of item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Item'
+      summary: Get details of item id
+      tags:
+      - Items
+    put:
+      consumes:
+      - application/json
+      description: Update item by ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ItemDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update item
+      tags:
+      - Items
+  /items/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get All Categories Items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Category'
+            type: array
+      summary: Categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Create Category Item in db
+      parameters:
+      - description: Add Category Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create Category
+      tags:
+      - Categories
+  /items/category:
+    put:
+      consumes:
+      - application/json
+      description: Update Category Item by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id_category
+        required: true
+        type: string
+      - description: Update item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update Category Item
+      tags:
+      - Categories
+  /items/category/:id_category:
+    delete:
+      description: Delete Category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id_category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete Category
+      tags:
+      - Categories
+    get:
+      consumes:
+      - application/json
+      description: Get Category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id_category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Category'
+      summary: Get Category
+      tags:
+      - Categories
+  /items/list:
+    post:
+      consumes:
+      - application/json
+      description: Get item by IDs in body
+      parameters:
+      - description: Add items
+        in: body
+        name: items
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ItemsIds'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ItemsOutput'
+      summary: Get items by ids
+      tags:
+      - Items
+  /items/shop/:id/category/:category_id:
+    get:
+      consumes:
+      - application/json
+      description: Get details of items
+      parameters:
+      - description: Shop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ItemsOutput'
+      summary: Get details of items by shop ID and category ID
+      tags:
+      - Items
+  /items/shop/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of items
+      parameters:
+      - description: Shop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ItemsOutput'
+      summary: Get details of items by shop ID
+      tags:
+      - Items
+  /ping:
+    get:
+      description: test if the router works correctly SAPEEE
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Ping
+      tags:
+      - ping
+swagger: "2.0"
