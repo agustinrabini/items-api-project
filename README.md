@@ -1,13 +1,29 @@
-## Go Items Api Project
+# Go Items Api Project
 
-# Porpose of the Repository
+## Porpose of the Repository
 
-This repository is meant to show you how I manage the development Go modules to solve bussines needs. In this case this Api represents the Items domain and all it functionabilties. 
+This repository demonstrates how I develop Go modules to solve business needs. This API represents the Items domain and all its functionalities.
 
-# Implementations
+## Implementations
 
-Here you can find the implementation of Clean Architecture, CI/CD implementation, Databases implementation and querying, connection to internal (Apis) and external services such as Firebase. Other repositories implements other Google Cloud Services such as Google Api Places.
+In this repository, you will find implementations of:
 
-The full project consists on 8 Api modules structured in a Microservices architecture. In this particular repo you cand find the solutions for Items domain.
+- Clean Architecture
 
-THe whole application is an own proyect that works as a e-commerce.
+- CI/CD
+
+- Databases and querying
+
+- Connections to internal APIs
+
+- Connections to external services such as Firebase
+
+- Tests: Unit tests and Functional Tests
+
+Other repositories demonstrate the use of additional Google Cloud Services, such as the Google Places API.
+
+## The whole project
+
+The full project consists of 8 API modules structured within a microservices architecture. In this particular repository, you will find the solutions for the Items domain.
+
+This entire application is a personal project that functions as an e-commerce platform.
