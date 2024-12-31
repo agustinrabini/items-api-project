@@ -20,6 +20,8 @@ In this repository, you will find implementations of:
 
 - Tests: Unit tests and Functional Tests
 
+- Swagger documentation
+
 Other repositories demonstrate the use of additional Google Cloud Services, such as the Google Places API.
 
 ## The whole project
